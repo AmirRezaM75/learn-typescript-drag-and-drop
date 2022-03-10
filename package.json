@@ -1,0 +1,28 @@
+{
+  "name": "typescript-drag-and-drop",
+  "version": "1.0.0",
+  "description": "Exercise files for \"Understanding TypeScript\" course by academind.",
+  "main": "index.js",
+  "scripts": {
+    "start": "lite-server",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/AmirRezaM75/typescript-drag-and-drop.git"
+  },
+  "keywords": [
+    "typescript",
+    "drag",
+    "drop"
+  ],
+  "author": "Amir Reza Mehrbakhsh",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/AmirRezaM75/typescript-drag-and-drop/issues"
+  },
+  "homepage": "https://github.com/AmirRezaM75/typescript-drag-and-drop#readme",
+  "devDependencies": {
+    "lite-server": "^2.6.1"
+  }
+}
