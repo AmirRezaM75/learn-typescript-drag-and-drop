@@ -1,3 +1,12 @@
+function autobind(target: any, propertyKey: string, descriptor: PropertyDescriptor) {
+  return {
+      configurable: true,
+      get() {
+          return descriptor.value.bind(this)
+      }
+  }
+}
+
 class ProjectForm {
   container: HTMLDivElement;
   template: HTMLTemplateElement;
@@ -33,6 +42,7 @@ class ProjectForm {
     console.log(this.title.value);
   }
 
+  @autobind
   private configure() {
     this.form.addEventListener("submit", this.submit);
   }
