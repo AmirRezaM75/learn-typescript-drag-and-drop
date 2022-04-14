@@ -46,23 +46,22 @@ class ProjectForm {
 
     const validator = new Validator();
 
-    validator.make(
-      {
-        title: this.title.value,
-        description: this.description.value,
-        people: this.people.value,
-      },
-      {
-        title: "required|max:10",
-        description: "required|min:10|max:50",
-        people: "required|max:5",
-      }
-    );
+    const data = {
+      title: this.title.value,
+      description: this.description.value,
+      people: this.people.value,
+    };
+
+    validator.make(data, {
+      title: "required|max:10",
+      description: "required|min:10|max:50",
+      people: "required|max:5",
+    });
 
     if (validator.fails()) {
       alert("This given data is invalid");
     } else {
-      console.log("success");
+      projectState.add(data.title, data.description, parseInt(data.people));
       this.reset();
     }
   }
@@ -84,6 +83,8 @@ class ProjectForm {
 }
 
 class ProjectContainer {
+  projects: Project[] = [];
+
   container: HTMLDivElement;
 
   template: HTMLTemplateElement;
@@ -103,6 +104,16 @@ class ProjectContainer {
 
     const header = this.element.querySelector("h2")! as HTMLHeadElement;
     header.innerText = `${type.toUpperCase()} Projects`;
+
+    projectState.listener((projects) => {
+      this.projects = projects;
+      const ul = document.querySelector('ul') ! as HTMLUListElement;
+      for (const project of this.projects) {
+        const li = document.createElement('li')
+        li.textContent = project.title
+        ul.appendChild(li)
+      }
+    });
 
     this.container.insertAdjacentElement("beforeend", this.element);
   }
@@ -178,6 +189,58 @@ class Validator {
     }
   }
 }
+
+enum ProjectStatus {
+  Active,
+  Finished,
+}
+
+class Project {
+  constructor(
+    private id: string,
+    private title: string,
+    private description: string,
+    private people: number,
+    private status: ProjectStatus
+  ) {}
+}
+
+type ProjectListner = (projects: Project[]) => void;
+
+class ProjectState {
+  private listeners: ProjectListner[] = [];
+  projects: Project[] = [];
+  private static instance: ProjectState;
+  private constructor() {}
+
+  static getInstance() {
+    if (!this.instance) this.instance = new ProjectState();
+
+    return this.instance;
+  }
+
+  listener(fn: ProjectListner) {
+    this.listeners.push(fn);
+  }
+
+  add(title: string, description: string, people: number) {
+    const project = new Project(
+      Math.random.toString(),
+      title,
+      description,
+      people,
+      ProjectStatus.Active
+    );
+
+    this.projects.push(project);
+
+    for (const listner of this.listeners) {
+      listner(this.projects.slice());
+    }
+  }
+}
+
+const projectState = ProjectState.getInstance();
 
 new ProjectForm();
 new ProjectContainer("active");
