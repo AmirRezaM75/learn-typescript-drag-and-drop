@@ -62,7 +62,7 @@ class ProjectForm {
     if (validator.fails()) {
       alert("This given data is invalid");
     } else {
-      console.log("sucess");
+      console.log("success");
       this.reset();
     }
   }
@@ -80,6 +80,31 @@ class ProjectForm {
 
   attach() {
     this.container.insertAdjacentElement("afterbegin", this.form);
+  }
+}
+
+class ProjectContainer {
+  container: HTMLDivElement;
+
+  template: HTMLTemplateElement;
+
+  element: HTMLElement;
+
+  constructor(type: "active" | "finished") {
+    this.container = document.getElementById("app")! as HTMLDivElement;
+
+    this.template = document.getElementById(
+      "projects-container"
+    )! as HTMLTemplateElement;
+
+    this.element = document.importNode(this.template.content, true)
+      .firstElementChild! as HTMLElement;
+    this.element.id = `${type}-projects`;
+
+    const header = this.element.querySelector("h2")! as HTMLHeadElement;
+    header.innerText = `${type.toUpperCase()} Projects`;
+
+    this.container.insertAdjacentElement("beforeend", this.element);
   }
 }
 
@@ -134,7 +159,6 @@ class Validator {
   }
 
   private required(value: string) {
-    console.log(value.length);
     return value.length > 0;
   }
 
@@ -156,3 +180,5 @@ class Validator {
 }
 
 new ProjectForm();
+new ProjectContainer("active");
+new ProjectContainer("finished");
