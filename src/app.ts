@@ -103,15 +103,22 @@ class ProjectContainer {
     this.element.id = `${type}-projects`;
 
     const header = this.element.querySelector("h2")! as HTMLHeadElement;
-    header.innerText = `${type.toUpperCase()} Projects`;
+    header.innerText = `${type.toUpperCase()} PROJECTS`;
 
     projectState.listener((projects) => {
-      this.projects = projects;
-      const ul = document.querySelector('ul') ! as HTMLUListElement;
+      this.projects = projects.filter((project) => {
+        if (type === "active") return project.status === ProjectStatus.Active;
+        return project.status === ProjectStatus.Finished;
+      });
+
+      const ul = document.querySelector(
+        `#${type}-projects ul`
+      )! as HTMLUListElement;
+
       for (const project of this.projects) {
-        const li = document.createElement('li')
-        li.textContent = project.title
-        ul.appendChild(li)
+        const li = document.createElement("li");
+        li.textContent = project.title;
+        ul.appendChild(li);
       }
     });
 
@@ -197,18 +204,18 @@ enum ProjectStatus {
 
 class Project {
   constructor(
-    private id: string,
-    private title: string,
-    private description: string,
-    private people: number,
-    private status: ProjectStatus
+    public id: string,
+    public title: string,
+    public description: string,
+    public people: number,
+    public status: ProjectStatus
   ) {}
 }
 
-type ProjectListner = (projects: Project[]) => void;
+type ProjectListener = (projects: Project[]) => void;
 
 class ProjectState {
-  private listeners: ProjectListner[] = [];
+  private listeners: ProjectListener[] = [];
   projects: Project[] = [];
   private static instance: ProjectState;
   private constructor() {}
@@ -219,13 +226,13 @@ class ProjectState {
     return this.instance;
   }
 
-  listener(fn: ProjectListner) {
+  listener(fn: ProjectListener) {
     this.listeners.push(fn);
   }
 
   add(title: string, description: string, people: number) {
     const project = new Project(
-      Math.random.toString(),
+      Math.random().toString(),
       title,
       description,
       people,
@@ -234,8 +241,8 @@ class ProjectState {
 
     this.projects.push(project);
 
-    for (const listner of this.listeners) {
-      listner(this.projects.slice());
+    for (const listener of this.listeners) {
+      listener(this.projects.slice());
     }
   }
 }

@@ -71,12 +71,16 @@ class ProjectContainer {
             .firstElementChild;
         this.element.id = `${type}-projects`;
         const header = this.element.querySelector("h2");
-        header.innerText = `${type.toUpperCase()} Projects`;
+        header.innerText = `${type.toUpperCase()} PROJECTS`;
         projectState.listener((projects) => {
-            this.projects = projects;
-            const ul = document.querySelector('ul');
+            this.projects = projects.filter((project) => {
+                if (type === "active")
+                    return project.status === ProjectStatus.Active;
+                return project.status === ProjectStatus.Finished;
+            });
+            const ul = document.querySelector(`#${type}-projects ul`);
             for (const project of this.projects) {
-                const li = document.createElement('li');
+                const li = document.createElement("li");
                 li.textContent = project.title;
                 ul.appendChild(li);
             }
@@ -165,10 +169,10 @@ class ProjectState {
         this.listeners.push(fn);
     }
     add(title, description, people) {
-        const project = new Project(Math.random.toString(), title, description, people, ProjectStatus.Active);
+        const project = new Project(Math.random().toString(), title, description, people, ProjectStatus.Active);
         this.projects.push(project);
-        for (const listner of this.listeners) {
-            listner(this.projects.slice());
+        for (const listener of this.listeners) {
+            listener(this.projects.slice());
         }
     }
 }
