@@ -13,18 +13,27 @@ function autobind(target, propertyKey, descriptor) {
         },
     };
 }
-class ProjectForm {
-    constructor() {
-        this.template = document.getElementById("template");
-        this.container = document.getElementById("app");
-        this.form = document.importNode(this.template.content, true)
+class Component {
+    constructor(templateId, containerId, elementId, where = "beforeend") {
+        this.template = document.getElementById(templateId);
+        this.container = document.getElementById(containerId);
+        this.element = document.importNode(this.template.content, true)
             .firstElementChild;
-        this.form.id = "project-form";
-        this.title = this.form.querySelector("#title");
-        this.description = this.form.querySelector("#description");
-        this.people = this.form.querySelector("#people");
-        this.attach();
+        if (elementId)
+            this.element.id = elementId;
         this.configure();
+        this.container.insertAdjacentElement(where, this.element);
+    }
+}
+class ProjectForm extends Component {
+    constructor() {
+        super("form-template", "app", "project-form");
+        this.title = this.element.querySelector("#title");
+        this.description = this.element.querySelector("#description");
+        this.people = this.element.querySelector("#people");
+    }
+    configure() {
+        this.element.addEventListener("submit", this.submit);
     }
     submit(e) {
         e.preventDefault();
@@ -52,40 +61,32 @@ class ProjectForm {
         this.description.value = "";
         this.people.value = "";
     }
-    configure() {
-        this.form.addEventListener("submit", this.submit);
-    }
-    attach() {
-        this.container.insertAdjacentElement("afterbegin", this.form);
-    }
 }
 __decorate([
     autobind
 ], ProjectForm.prototype, "configure", null);
-class ProjectContainer {
+class ProjectContainer extends Component {
     constructor(type) {
+        super("projects-container", "app", `${type}-projects`);
+        this.type = type;
         this.projects = [];
-        this.container = document.getElementById("app");
-        this.template = document.getElementById("projects-container");
-        this.element = document.importNode(this.template.content, true)
-            .firstElementChild;
-        this.element.id = `${type}-projects`;
         const header = this.element.querySelector("h2");
         header.innerText = `${type.toUpperCase()} PROJECTS`;
+    }
+    configure() {
         projectState.listener((projects) => {
             this.projects = projects.filter((project) => {
-                if (type === "active")
+                if (this.type === "active")
                     return project.status === ProjectStatus.Active;
                 return project.status === ProjectStatus.Finished;
             });
-            const ul = document.querySelector(`#${type}-projects ul`);
+            const ul = document.querySelector(`#${this.type}-projects ul`);
             for (const project of this.projects) {
                 const li = document.createElement("li");
                 li.textContent = project.title;
                 ul.appendChild(li);
             }
         });
-        this.container.insertAdjacentElement("beforeend", this.element);
     }
 }
 class Validator {

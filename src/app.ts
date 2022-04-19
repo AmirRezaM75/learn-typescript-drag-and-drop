@@ -11,34 +11,54 @@ function autobind(
   };
 }
 
-class ProjectForm {
-  container: HTMLDivElement;
+abstract class Component<T extends HTMLElement, U extends HTMLElement> {
   template: HTMLTemplateElement;
-  form: HTMLFormElement;
+  container: T;
+  element: U;
+
+  constructor(
+    templateId: string,
+    containerId: string,
+    elementId?: string,
+    where: InsertPosition = "beforeend"
+  ) {
+    this.template = document.getElementById(templateId)! as HTMLTemplateElement;
+
+    this.container = document.getElementById(containerId)! as T;
+
+    this.element = document.importNode(this.template.content, true)
+      .firstElementChild as U;
+
+    if (elementId) this.element.id = elementId;
+
+    this.configure();
+
+    this.container.insertAdjacentElement(where, this.element);
+  }
+
+  abstract configure(): void;
+}
+
+class ProjectForm extends Component<HTMLDivElement, HTMLFormElement> {
   title: HTMLInputElement;
   description: HTMLInputElement;
   people: HTMLInputElement;
 
   constructor() {
-    this.template = document.getElementById("template")! as HTMLTemplateElement;
+    super("form-template", "app", "project-form");
 
-    this.container = document.getElementById("app")! as HTMLDivElement;
+    this.title = this.element.querySelector("#title") as HTMLInputElement;
 
-    this.form = document.importNode(this.template.content, true)
-      .firstElementChild as HTMLFormElement;
-    this.form.id = "project-form";
-
-    this.title = this.form.querySelector("#title") as HTMLInputElement;
-
-    this.description = this.form.querySelector(
+    this.description = this.element.querySelector(
       "#description"
     ) as HTMLInputElement;
 
-    this.people = this.form.querySelector("#people") as HTMLInputElement;
+    this.people = this.element.querySelector("#people") as HTMLInputElement;
+  }
 
-    this.attach();
-
-    this.configure();
+  @autobind
+  configure() {
+    this.element.addEventListener("submit", this.submit);
   }
 
   private submit(e: Event) {
@@ -71,48 +91,28 @@ class ProjectForm {
     this.description.value = "";
     this.people.value = "";
   }
-
-  @autobind
-  private configure() {
-    this.form.addEventListener("submit", this.submit);
-  }
-
-  attach() {
-    this.container.insertAdjacentElement("afterbegin", this.form);
-  }
 }
 
-class ProjectContainer {
+class ProjectContainer extends Component<HTMLDivElement, HTMLElement> {
   projects: Project[] = [];
 
-  container: HTMLDivElement;
-
-  template: HTMLTemplateElement;
-
-  element: HTMLElement;
-
-  constructor(type: "active" | "finished") {
-    this.container = document.getElementById("app")! as HTMLDivElement;
-
-    this.template = document.getElementById(
-      "projects-container"
-    )! as HTMLTemplateElement;
-
-    this.element = document.importNode(this.template.content, true)
-      .firstElementChild! as HTMLElement;
-    this.element.id = `${type}-projects`;
+  constructor(private type: "active" | "finished") {
+    super("projects-container", "app", `${type}-projects`);
 
     const header = this.element.querySelector("h2")! as HTMLHeadElement;
     header.innerText = `${type.toUpperCase()} PROJECTS`;
+  }
 
+  configure(): void {
     projectState.listener((projects) => {
       this.projects = projects.filter((project) => {
-        if (type === "active") return project.status === ProjectStatus.Active;
+        if (this.type === "active")
+          return project.status === ProjectStatus.Active;
         return project.status === ProjectStatus.Finished;
       });
 
       const ul = document.querySelector(
-        `#${type}-projects ul`
+        `#${this.type}-projects ul`
       )! as HTMLUListElement;
 
       for (const project of this.projects) {
@@ -121,8 +121,6 @@ class ProjectContainer {
         ul.appendChild(li);
       }
     });
-
-    this.container.insertAdjacentElement("beforeend", this.element);
   }
 }
 
