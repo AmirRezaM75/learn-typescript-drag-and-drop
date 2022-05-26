@@ -83,6 +83,7 @@ class ProjectContainer extends Component {
             });
             const ul = document.querySelector(`#${this.type}-projects-container ul`);
             ul.id = `${this.type}-projects`;
+            ul.innerHTML = '';
             for (const project of this.projects) {
                 new ProjectItem(project);
             }
@@ -98,10 +99,12 @@ class ProjectItem extends Component {
         this.project = project;
         this.configure();
     }
+    get people() {
+        return this.project.people === 1 ? '1 Person' : `${this.project.people} People`;
+    }
     configure() {
         this.element.querySelector("h2").textContent = this.project.title;
-        this.element.querySelector("h3").textContent =
-            this.project.people.toString();
+        this.element.querySelector("h3").textContent = this.people;
         this.element.querySelector("p").textContent = this.project.description;
     }
 }
