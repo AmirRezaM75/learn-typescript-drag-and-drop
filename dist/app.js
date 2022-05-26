@@ -21,13 +21,13 @@ class Component {
             .firstElementChild;
         if (elementId)
             this.element.id = elementId;
-        this.configure();
         this.container.insertAdjacentElement(where, this.element);
     }
 }
 class ProjectForm extends Component {
     constructor() {
         super("form-template", "app", "project-form");
+        this.configure();
         this.title = this.element.querySelector("#title");
         this.description = this.element.querySelector("#description");
         this.people = this.element.querySelector("#people");
@@ -67,9 +67,10 @@ __decorate([
 ], ProjectForm.prototype, "configure", null);
 class ProjectContainer extends Component {
     constructor(type) {
-        super("projects-container", "app", `${type}-projects`);
+        super("projects-container", "app", `${type}-projects-container`);
         this.type = type;
         this.projects = [];
+        this.configure();
         const header = this.element.querySelector("h2");
         header.innerText = `${type.toUpperCase()} PROJECTS`;
     }
@@ -80,13 +81,28 @@ class ProjectContainer extends Component {
                     return project.status === ProjectStatus.Active;
                 return project.status === ProjectStatus.Finished;
             });
-            const ul = document.querySelector(`#${this.type}-projects ul`);
+            const ul = document.querySelector(`#${this.type}-projects-container ul`);
+            ul.id = `${this.type}-projects`;
             for (const project of this.projects) {
-                const li = document.createElement("li");
-                li.textContent = project.title;
-                ul.appendChild(li);
+                new ProjectItem(project);
             }
         });
+    }
+}
+class ProjectItem extends Component {
+    constructor(project) {
+        const containerId = project.status === ProjectStatus.Active
+            ? "active-projects"
+            : "finished-projects";
+        super("project-item", containerId);
+        this.project = project;
+        this.configure();
+    }
+    configure() {
+        this.element.querySelector("h2").textContent = this.project.title;
+        this.element.querySelector("h3").textContent =
+            this.project.people.toString();
+        this.element.querySelector("p").textContent = this.project.description;
     }
 }
 class Validator {

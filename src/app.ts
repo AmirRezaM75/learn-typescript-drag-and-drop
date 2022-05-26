@@ -31,8 +31,6 @@ abstract class Component<T extends HTMLElement, U extends HTMLElement> {
 
     if (elementId) this.element.id = elementId;
 
-    this.configure();
-
     this.container.insertAdjacentElement(where, this.element);
   }
 
@@ -46,6 +44,8 @@ class ProjectForm extends Component<HTMLDivElement, HTMLFormElement> {
 
   constructor() {
     super("form-template", "app", "project-form");
+
+    this.configure()
 
     this.title = this.element.querySelector("#title") as HTMLInputElement;
 
@@ -97,7 +97,9 @@ class ProjectContainer extends Component<HTMLDivElement, HTMLElement> {
   projects: Project[] = [];
 
   constructor(private type: "active" | "finished") {
-    super("projects-container", "app", `${type}-projects`);
+    super("projects-container", "app", `${type}-projects-container`);
+
+    this.configure()
 
     const header = this.element.querySelector("h2")! as HTMLHeadElement;
     header.innerText = `${type.toUpperCase()} PROJECTS`;
@@ -112,16 +114,37 @@ class ProjectContainer extends Component<HTMLDivElement, HTMLElement> {
       });
 
       const ul = document.querySelector(
-        `#${this.type}-projects ul`
+        `#${this.type}-projects-container ul`
       )! as HTMLUListElement;
+      ul.id = `${this.type}-projects`;
 
       for (const project of this.projects) {
-        const li = document.createElement("li");
-        li.textContent = project.title;
-        ul.appendChild(li);
+        new ProjectItem(project)
       }
     });
   }
+}
+
+class ProjectItem extends Component<HTMLUListElement, HTMLLIElement> {
+  constructor(private project: Project) {
+    const containerId =
+      project.status === ProjectStatus.Active
+        ? "active-projects"
+        : "finished-projects";
+
+    super("project-item", containerId);
+
+    this.configure()
+  }
+
+  configure(): void {
+    this.element.querySelector("h2")!.textContent = this.project.title;
+    this.element.querySelector("h3")!.textContent =
+      this.project.people.toString();
+    this.element.querySelector("p")!.textContent = this.project.description;
+  }
+
+
 }
 
 type Rule = "required" | "max" | "min";
