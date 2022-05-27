@@ -1,5 +1,5 @@
-import { ProjectContainer } from "./components/project-container.js";
-import { ProjectForm } from "./components/project-form.js";
+import { ProjectContainer } from "./components/project-container";
+import { ProjectForm } from "./components/project-form";
 
 new ProjectForm();
 new ProjectContainer("active");

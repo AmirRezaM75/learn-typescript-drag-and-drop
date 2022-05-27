@@ -1,8 +1,8 @@
-import { autobind } from "../decorators/autobind.js";
-import Component from "./base.js";
-import { Droppable } from "../interfaces/droppable.js";
-import { ProjectItem } from "./project-item.js";
-import { Project, projectState, ProjectStatus } from "../state/project.js";
+import { autobind } from "../decorators/autobind";
+import Component from "./base";
+import { Droppable } from "../interfaces/droppable";
+import { ProjectItem } from "./project-item";
+import { Project, projectState, ProjectStatus } from "../state/project";
 
 export class ProjectContainer
   extends Component<HTMLDivElement, HTMLElement>
