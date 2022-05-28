@@ -4,7 +4,7 @@
   "description": "Exercise files for \"Understanding TypeScript\" course by academind.",
   "main": "index.js",
   "scripts": {
-    "start": "lite-server",
+    "start": "webpack-dev-server",
     "build": "webpack",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
